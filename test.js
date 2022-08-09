@@ -1,4 +1,5 @@
 function test() {
-    return process.env.npm_config_myVar;
+    test = String(process.env.npm_config_myVar)
+    return test;
 }
 console.log(test())
