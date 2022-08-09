@@ -1,4 +1,4 @@
-function test() {
-    return "Hello you are calling a script from the fhir-converter repo :)"
+function test(xml) {
+    return xml
 }
 console.log(test())
