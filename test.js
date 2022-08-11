@@ -1,4 +1,4 @@
 function test() {
-    return String(process.env.npm_config_myVar);
+    return "This is the actual thing that I want to return like do you have access to it";
 }
-console.log(test())
+console.log(test());
