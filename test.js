@@ -1,26 +1,87 @@
 const WorkerPool = require("./src/lib/workers/workerPool");
 const fs = require('fs');
+const dataHandlerFactory = require("./src/lib/dataHandler/dataHandlerFactory");
+const HandlebarsConverter = require("./src/lib/handlebars-converter/handlebars-converter");
+const path = require("path");
+const constants = require("./src/lib/constants/constants");
+const Promise = require("promise");
+const { createNamespace } = require("cls-hooked");
+const compileCache = require("memory-cache");
+const {errorMessage, errorCodes} = require("./src/lib/error/error");
+var session = createNamespace(constants.CLS_NAMESPACE);
 
-async function test() {
-    if(process.env.npm_config_myVar === '' || process.env.npm_config_myVar === null || process.env.npm_config_myVar === undefined) {
-        return "Are you dumb?";
-    } else {
-        const xmlFile = fs.readFileSync(process.env.npm_config_myVar, 'utf8');
-        const workerPool = new WorkerPool('./src/lib/workers/worker.js', require('os').cpus().length);
-        return workerPool.exec({
-            'type': '/api/convert/:srcDataType/:template',
-            'srcData': xmlFile.toString(),
-            'srcDataType': "cda",
-            'templateName': "ccd.hbs"
-        }).then((result) => {
-            const resultMessage = result.resultMsg;
-            let newPath = process.env.npm_config_myVar.slice(0, -3);
-            newPath += "json";
-            fs.writeFileSync(newPath, JSON.stringify(resultMessage));
-        }).then(() => {
-            workerPool.destroy();
+function test() {
+    return new Promise((fulfill, reject) => {
+        session.run(() => {
+            let srcData = fs.readFileSync(process.env.npm_config_myVar, 'utf8');
+            let templateName = "ccd.hbs";
+            let srcDataType = "cda";
+            let dataTypeHandler = dataHandlerFactory.createDataHandler(srcDataType);
+            console.log("FACTORY ", dataTypeHandler);
+            let handlebarInstance = HandlebarsConverter.instance(true,
+                dataTypeHandler,
+                path.join(constants.TEMPLATE_FILES_LOCATION, dataTypeHandler.dataType),
+                undefined);
+            session.set(constants.CLS_KEY_HANDLEBAR_INSTANCE, handlebarInstance);
+            session.set(constants.CLS_KEY_TEMPLATE_LOCATION, path.join(constants.TEMPLATE_FILES_LOCATION, dataTypeHandler.dataType));
+
+            const getTemplate = (templateName) => {
+                return new Promise((fulfill, reject) => {
+                    var template = compileCache.get(templateName);
+                    if (!template) {
+                        fs.readFile(path.join(constants.TEMPLATE_FILES_LOCATION, srcDataType, templateName), (err, templateContent) => {
+                            if (err) {
+                                reject({ 'status': 404, 'resultMsg': errorMessage(errorCodes.NotFound, "Template not found") });
+                            }
+                            else {
+                                try {
+                                    template = handlebarInstance.compile(dataTypeHandler.preProcessTemplate(templateContent.toString()));
+                                    compileCache.put(templateName, template);
+                                    fulfill(template);
+                                }
+                                catch (convertErr) {
+                                    reject();
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        fulfill(template);
+                    }
+                });
+            };
+
+            dataTypeHandler.parseSrcData(srcData)
+                .then((parsedData) => {
+                    var dataContext = { msg: parsedData };
+                    getTemplate(templateName)
+                        .then((compiledTemplate) => {
+                            try {
+                                console.log("DO WE GET RIGHT HERE");
+                                let test = generateResult(dataTypeHandler, dataContext, compiledTemplate);
+                                let newPath = process.env.npm_config_myVar.slice(0, -3);
+                                newPath += "json";
+                                fs.writeFileSync(newPath, JSON.stringify(test));
+                                fulfill(generateResult(dataTypeHandler, dataContext, compiledTemplate));
+                            }
+                            catch (convertErr) {
+                                reject();
+                            }
+                        }, (err) => {
+                            reject(err);
+                        });
+                })
+                .catch(err => {
+                    reject(err);
+                });
+
         });
-    }
+    });
+}
+
+function generateResult(dataTypeHandler, dataContext, template) {
+    var result = dataTypeHandler.postProcessResult(template(dataContext));
+    return Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), { 'fhirResource': result });
 }
 
 console.log(test());
