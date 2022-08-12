@@ -1,4 +1,3 @@
-const WorkerPool = require("./src/lib/workers/workerPool");
 const fs = require('fs');
 const dataHandlerFactory = require("./src/lib/dataHandler/dataHandlerFactory");
 const HandlebarsConverter = require("./src/lib/handlebars-converter/handlebars-converter");
