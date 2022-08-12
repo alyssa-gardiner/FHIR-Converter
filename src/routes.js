@@ -828,6 +828,7 @@ module.exports = function (app) {
                 delete resultMessage['invalidAccess'];
             }
             res.status(result.status);
+            console.log("RESULT: ", result);
             res.json(resultMessage);
             return;
         });
