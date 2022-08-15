@@ -123,7 +123,7 @@ WorkerUtils.workerTaskProcessor((msg) => {
                         let dataTypeHandler = dataHandlerFactory.createDataHandler(srcDataType);
                         let handlebarInstance = GetHandlebarsInstance(dataTypeHandler);
                         session.set(constants.CLS_KEY_HANDLEBAR_INSTANCE, handlebarInstance);
-                        session.set(constants.CLS_KEY_TEMPLATE_LOCATION, path.join(constants.TEMPLATE_FILES_LOCATION, dataTypeHandler.dataType));
+                        session.set(constants.CLS_KEY_TEMPLATE_LOCATION, path.join(constants.BASE_TEMPLATE_FILES_LOCATION, dataTypeHandler.dataType));
 
                         if (!srcData || srcData.length == 0) {
                             reject({ 'status': 400, 'resultMsg': errorMessage(errorCodes.BadRequest, "No srcData provided.") });
@@ -133,7 +133,7 @@ WorkerUtils.workerTaskProcessor((msg) => {
                             return new Promise((fulfill, reject) => {
                                 var template = compileCache.get(templateName);
                                 if (!template) {
-                                    fs.readFile(path.join(constants.TEMPLATE_FILES_LOCATION, srcDataType, templateName), (err, templateContent) => {
+                                    fs.readFile(path.join(constants.BASE_TEMPLATE_FILES_LOCATION, srcDataType, templateName), (err, templateContent) => {
                                         if (err) {
                                             reject({ 'status': 404, 'resultMsg': errorMessage(errorCodes.NotFound, "Template not found") });
                                         }
