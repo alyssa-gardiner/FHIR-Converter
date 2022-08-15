@@ -1,2 +1,2 @@
 const test = require('./test');
-console.log(test.getName());
+console.log(test.createAndUploadFhirResource());

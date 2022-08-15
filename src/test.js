@@ -9,7 +9,7 @@ const compileCache = require("memory-cache");
 const {errorMessage, errorCodes} = require("./lib/error/error");
 const session = createNamespace(constants.CLS_NAMESPACE);
 
-const getName = () => {
+const createAndUploadFhirResource = () => {
     console.log("OK OK OK OK OK");
     return new Promise((fulfill, reject) => {
         session.run(() => {
@@ -83,4 +83,4 @@ function generateResult(dataTypeHandler, dataContext, template) {
     return Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), { 'fhirResource': result });
 }
 
-exports.getName = getName;
+exports.createAndUploadFhirResource = createAndUploadFhirResource;
