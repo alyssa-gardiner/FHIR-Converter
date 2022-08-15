@@ -1,15 +1,16 @@
 const fs = require('fs');
-const dataHandlerFactory = require("./src/lib/dataHandler/dataHandlerFactory");
-const HandlebarsConverter = require("./src/lib/handlebars-converter/handlebars-converter");
+const dataHandlerFactory = require("./lib/dataHandler/dataHandlerFactory");
+const HandlebarsConverter = require("./lib/handlebars-converter/handlebars-converter");
 const path = require("path");
-const constants = require("./src/lib/constants/constants");
+const constants = require("./lib/constants/constants");
 const Promise = require("promise");
 const { createNamespace } = require("cls-hooked");
 const compileCache = require("memory-cache");
-const {errorMessage, errorCodes} = require("./src/lib/error/error");
+const {errorMessage, errorCodes} = require("./lib/error/error");
 const session = createNamespace(constants.CLS_NAMESPACE);
 
-function test() {
+const getName = () => {
+    console.log("OK OK OK OK OK");
     return new Promise((fulfill, reject) => {
         session.run(() => {
             let srcData = fs.readFileSync(process.env.npm_config_myVar, 'utf8');
@@ -74,11 +75,12 @@ function test() {
 
         });
     });
-}
+};
+
 
 function generateResult(dataTypeHandler, dataContext, template) {
     var result = dataTypeHandler.postProcessResult(template(dataContext));
     return Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), { 'fhirResource': result });
 }
 
-test();
+exports.getName = getName;
