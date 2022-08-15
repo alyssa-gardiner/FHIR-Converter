@@ -7,7 +7,7 @@ const Promise = require("promise");
 const { createNamespace } = require("cls-hooked");
 const compileCache = require("memory-cache");
 const {errorMessage, errorCodes} = require("./src/lib/error/error");
-var session = createNamespace(constants.CLS_NAMESPACE);
+const session = createNamespace(constants.CLS_NAMESPACE);
 
 function test() {
     return new Promise((fulfill, reject) => {
@@ -16,7 +16,6 @@ function test() {
             let templateName = "ccd.hbs";
             let srcDataType = "cda";
             let dataTypeHandler = dataHandlerFactory.createDataHandler(srcDataType);
-            console.log("FACTORY ", dataTypeHandler);
             let handlebarInstance = HandlebarsConverter.instance(true,
                 dataTypeHandler,
                 path.join(constants.TEMPLATE_FILES_LOCATION, dataTypeHandler.dataType),
@@ -56,7 +55,6 @@ function test() {
                     getTemplate(templateName)
                         .then((compiledTemplate) => {
                             try {
-                                console.log("DO WE GET RIGHT HERE");
                                 let test = generateResult(dataTypeHandler, dataContext, compiledTemplate);
                                 let newPath = process.env.npm_config_myVar.slice(0, -3);
                                 newPath += "json";
@@ -83,4 +81,4 @@ function generateResult(dataTypeHandler, dataContext, template) {
     return Object.assign(dataTypeHandler.getConversionResultMetadata(dataContext.msg), { 'fhirResource': result });
 }
 
-console.log(test());
+test();

@@ -26,8 +26,8 @@ function GetHandlebarsInstance(dataTypeHandler, templatesMap) {
         dataTypeHandler,
         path.join(constants.TEMPLATE_FILES_LOCATION, dataTypeHandler.dataType),
         templatesMap);
-    console.log("how about now: ", templatesMap);
     rebuildCache = needToUseMap ? true : false; // New instance should be created also after templatesMap usage
+
     return instance;
 }
 
@@ -141,7 +141,6 @@ WorkerUtils.workerTaskProcessor((msg) => {
                                             try {
                                                 template = handlebarInstance.compile(dataTypeHandler.preProcessTemplate(templateContent.toString()));
                                                 compileCache.put(templateName, template);
-                                                console.log(template);
                                                 fulfill(template);
                                             }
                                             catch (convertErr) {
@@ -159,8 +158,6 @@ WorkerUtils.workerTaskProcessor((msg) => {
                                 }
                             });
                         };
-
-                        console.log("getTemplate: ", getTemplate(templateName));
 
                         dataTypeHandler.parseSrcData(srcData)
                             .then((parsedData) => {
